@@ -30,14 +30,23 @@ footer#contacts{border-top:1px solid var(--bd);background:var(--bg2)}.fg{gap:34p
 </style>"""
 if 'id="delo-est-studio"' in s:s=re.sub(r'<style id="delo-est-studio">.*?</style>',css,s,count=1,flags=re.S)
 else:s=s.replace('</head>',css+'\n</head>',1)
-# Follow the OS until the user chooses a theme explicitly.
+# Respect explicit choice; otherwise track the operating-system preference.
+theme_fn = r"""let DELO_AUTO_THEME=false;
+function theme(t,save=true){
+ const d=document.documentElement;
+ if(t===undefined){DELO_AUTO_THEME=false;t=d.dataset.theme==='dark'?'light':'dark';save=true}
+ else if(t==='auto'){DELO_AUTO_THEME=true;t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';save=false}
+ else{DELO_AUTO_THEME=false}
+ d.dataset.theme=t;
+ const mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content=t==='dark'?'#0A1120':'#F4F7FC';
+ try{if(save)localStorage.setItem('gig_t',t)}catch(e){}
+ const btn=document.querySelector('#th');if(btn)btn.innerHTML=ico(t==='dark'?'sun':'moon')
+}
+"""
 if "let DELO_AUTO_THEME=false" not in s:
-  s=s.replace("function theme(t,save=true){", "let DELO_AUTO_THEME=false;function theme(t,save=true){DELO_AUTO_THEME=t==='auto';if(t==='auto'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';save=false}")
-  s=s.replace("function theme(t){", "let DELO_AUTO_THEME=false;function theme(t){DELO_AUTO_THEME=t==='auto';if(t==='auto')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';")
-  # add startup media listener after the theme function, only when exact end is present
-  marker="(()=>{let t;try{t=localStorage.getItem('gig_t')}catch(e){}"
-  if marker in s:
-    s=s.replace(marker,"(()=>{const m=matchMedia('(prefers-color-scheme: dark)');const follow=()=>{if(DELO_AUTO_THEME)theme('auto',false)};if(m.addEventListener)m.addEventListener('change',follow);else if(m.addListener)m.addListener(follow);let t;try{t=localStorage.getItem('gig_t')}catch(e){}")
+  s=re.sub(r'function theme\([^\n]*\n',theme_fn,s,count=1)
+  boot=r"""(()=>{const media=matchMedia('(prefers-color-scheme: dark)');const follow=()=>{if(DELO_AUTO_THEME)theme('auto',false)};if(media.addEventListener)media.addEventListener('change',follow);else if(media.addListener)media.addListener(follow);let saved=null;try{saved=localStorage.getItem('gig_t')}catch(e){}theme(saved||'auto',false)})();"""
+  s=re.sub(r'\(\(\)=>\{let t;try\{t=localStorage\.getItem\([\s\S]*?\}\)\(\);',boot,s,count=1)
 p.write_text(s,encoding="utf-8")
 m=root/"manifest.webmanifest"
 if m.exists():
