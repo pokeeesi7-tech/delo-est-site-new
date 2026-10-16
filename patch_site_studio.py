@@ -17,6 +17,10 @@ if 'let TH_AUTO=false' not in s:
     end=s.find('// Интерфейс адаптируется',start)
     if start<0 or end<0: raise SystemExit('Could not locate original theme controller safely')
     s=s[:start]+new_theme+'\n'+s[end:]
+# Recompose the listing page into a desktop filter rail + results canvas, while retaining existing IDs/handlers.
+s=s.replace('<main class="page"><h2>Объявления</h2><div class="bar">','<main class="page listing-page"><div class="listing-title"><div><span class="page-eyebrow">МАРКЕТПЛЕЙС</span><h2>Найти своё дело</h2></div><span class="listing-note">Актуальные объявления рядом с вами</span></div><div class="listing-layout"><aside class="filter-rail"><div class="filter-title">Настроить поиск</div><div class="bar">',1)
+s=s.replace('</div><div class="row" style="margin-bottom:10px"><span id="cnt"','</div></aside><section class="listing-results"><div class="row" style="margin-bottom:10px"><span id="cnt"',1)
+s=s.replace('<div id="more" style="text-align:center;margin-top:16px"></div></main>','<div id="more" style="text-align:center;margin-top:16px"></div></section></div></main>',1)
 css_path=Path(__file__).resolve().with_name('studio-v5.css')
 if not css_path.exists(): raise SystemExit(f'Missing design stylesheet {css_path}')
 css=css_path.read_text(encoding='utf-8')
