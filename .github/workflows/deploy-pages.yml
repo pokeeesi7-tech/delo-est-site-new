@@ -27,9 +27,11 @@ jobs:
           test -f delo-est-site-redesign.zip || { echo "::error::Upload delo-est-site-redesign.zip to the repository root first"; exit 1; }
           mkdir -p extracted public
           unzip -q delo-est-site-redesign.zip -d extracted
+          python3 -m pip install --quiet pillow
           python3 patch_site.py extracted/delo-est-site
           python3 patch_site_v4.py extracted/delo-est-site
           python3 patch_site_studio.py extracted/delo-est-site
+          python3 brand_assets.py site extracted/delo-est-site
           cp -a extracted/delo-est-site/. public/
           test -f public/index.html
       - uses: actions/configure-pages@v5
