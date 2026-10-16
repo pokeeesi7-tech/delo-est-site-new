@@ -29,6 +29,7 @@ jobs:
           unzip -q delo-est-site-redesign.zip -d extracted
           python3 -m pip install --quiet pillow
           python3 patch_site_relaunch.py extracted/delo-est-site
+          python3 patch_site_theme_cycle.py extracted/delo-est-site
           python3 patch_site_cardfix.py extracted/delo-est-site
           python3 brand_assets_relaunch.py site extracted/delo-est-site
           cp -a extracted/delo-est-site/. public/
